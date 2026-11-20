@@ -3,7 +3,7 @@ package com.mcharolabs.cache.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mcharolabs.cache.service.CacheService;
+import com.mcharolabs.cache.service.impl.CacheServiceImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,10 +31,10 @@ public class CacheAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public CacheService cacheService(
+    public CacheServiceImpl cacheService(
             StringRedisTemplate redisTemplate,
             ObjectMapper cacheObjectMapper,
             CacheProperties properties) {
-        return new CacheService(redisTemplate, cacheObjectMapper, properties);
+        return new CacheServiceImpl(redisTemplate, cacheObjectMapper, properties);
     }
 }

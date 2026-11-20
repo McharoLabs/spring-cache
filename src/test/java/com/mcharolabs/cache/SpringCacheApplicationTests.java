@@ -2,7 +2,7 @@ package com.mcharolabs.cache;
 
 import com.mcharolabs.cache.config.CacheAutoConfiguration;
 import com.mcharolabs.cache.config.CacheProperties;
-import com.mcharolabs.cache.service.CacheService;
+import com.mcharolabs.cache.service.impl.CacheServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,14 +29,14 @@ class SpringCacheApplicationTests {
 	}
 
 	@Autowired
-	private CacheService cacheService;
+	private CacheServiceImpl cacheServiceImpl;
 
 	@Autowired
 	private CacheProperties cacheProperties;
 
 	@Test
 	void contextLoadsAndRegistersCacheBeans() {
-		assertThat(cacheService).isNotNull();
+		assertThat(cacheServiceImpl).isNotNull();
 		assertThat(cacheProperties).isNotNull();
 		assertThat(cacheProperties.getDefaultTtlSeconds()).isEqualTo(3600);
 	}

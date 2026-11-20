@@ -8,6 +8,7 @@ import com.mcharolabs.cache.service.CacheService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,14 +53,32 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends CacheDataDto> T set(String key, T value) {
+        Instant now = Instant.now();
+        String fullKey = formatKey(key);
+        Class<T> valueType = (Class<T>) value.getClass();
+
+        Optional<T> existingOpt = get(key, valueType);
+        if (existingOpt.isPresent()) {
+            Instant originalCreatedAt = existingOpt.get().getCreatedAt();
+            if (originalCreatedAt != null) {
+                value.setCreatedAt(originalCreatedAt);
+            } else if (value.getCreatedAt() == null) {
+                value.setCreatedAt(now);
+            }
+        } else if (value.getCreatedAt() == null) {
+            value.setCreatedAt(now);
+        }
+
+        value.setUpdatedAt(now);
+
         try {
             String json = objectMapper.writeValueAsString(value);
             long ttl = value.getTtlSeconds() != null
                     ? value.getTtlSeconds()
                     : properties.getDefaultTtlSeconds();
 
-            String fullKey = formatKey(key);
             if (ttl > 0) {
                 redisTemplate.opsForValue().set(fullKey, json, Duration.ofSeconds(ttl));
             } else {

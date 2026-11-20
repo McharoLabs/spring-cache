@@ -1,10 +1,10 @@
 package com.mcharolabs.cache.dto;
 
+import java.time.Instant;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SuperBuilder;
-
-import java.time.Instant;
+import lombok.experimental.SuperBuilder;
 
 /**
  * @author godfrey.steven
@@ -14,9 +14,14 @@ import java.time.Instant;
 @Setter
 @SuperBuilder
 public abstract class CacheDataDto {
+
     private Long ttlSeconds;
-    private Instant createdAt;
-    private Instant updatedAt;
+
+    @Builder.Default
+    private Instant createdAt = Instant.now();
+
+    @Builder.Default
+    private Instant updatedAt = Instant.now();
 
     protected CacheDataDto() {
         Instant now = Instant.now();

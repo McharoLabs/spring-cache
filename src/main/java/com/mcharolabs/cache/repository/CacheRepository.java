@@ -4,16 +4,20 @@ import com.mcharolabs.cache.dto.CacheDataDto;
 import java.util.Optional;
 
 /**
+ * Base cache repository for a specific {@link CacheDataDto} subtype and identifier type.
+ *
  * @author godfrey.steven
  * @since 2026
  */
-public interface CacheRepository<ID, T extends CacheDataDto> {
+public abstract class CacheRepository<ID, T extends CacheDataDto> {
 
-    T save(ID id, T value);
+    protected abstract String getKey(ID id);
 
-    Optional<T> findById(ID id);
+    public abstract T save(ID id, T value);
 
-    boolean deleteById(ID id);
+    public abstract Optional<T> findById(ID id);
 
-    boolean existsById(ID id);
+    public abstract boolean deleteById(ID id);
+
+    public abstract boolean existsById(ID id);
 }

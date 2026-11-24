@@ -7,12 +7,15 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -23,14 +26,15 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Scans packages for {@link CacheRepository} interfaces and registers {@link CacheRepositoryFactoryBean} definitions.
+ * Scans auto-configured packages for {@link CacheRepository} interfaces and registers proxy beans.
  *
  * @author godfrey.steven
  * @since 2026
  */
-class CacheRepositoriesRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
+public class CacheRepositoriesRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware, BeanFactoryAware {
 
     private Environment environment;
+    private BeanFactory beanFactory;
 
     @Override
     public void setEnvironment(@NonNull Environment environment) {
@@ -38,7 +42,12 @@ class CacheRepositoriesRegistrar implements ImportBeanDefinitionRegistrar, Envir
     }
 
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
+    public void setBeanFactory(@NonNull BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
+    @Override
+    public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
         Set<String> packages = new LinkedHashSet<>();
 
         var attrs = importingClassMetadata.getAnnotationAttributes(EnableCacheRepositories.class.getName());
@@ -47,6 +56,10 @@ class CacheRepositoriesRegistrar implements ImportBeanDefinitionRegistrar, Envir
             if (configured != null) {
                 packages.addAll(Arrays.asList(configured));
             }
+        }
+
+        if (packages.isEmpty() && beanFactory != null && AutoConfigurationPackages.has(beanFactory)) {
+            packages.addAll(AutoConfigurationPackages.get(beanFactory));
         }
 
         if (packages.isEmpty()) {

@@ -23,7 +23,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Scans packages for {@link CacheRepository} interfaces and registers proxy bean definitions.
+ * Scans packages for {@link CacheRepository} interfaces and registers {@link CacheRepositoryFactoryBean} definitions.
  *
  * @author godfrey.steven
  * @since 2026
@@ -79,10 +79,8 @@ class CacheRepositoriesRegistrar implements ImportBeanDefinitionRegistrar, Envir
                     }
                     Class<? extends CacheDataDto> valueType = resolveValueType(repoClass);
 
-                    BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(repoClass, () -> {
-                        throw new IllegalStateException("Use factory method with BeanFactory");
-                    });
-                    builder.setFactoryMethodOnBean("createRepositoryProxy", "cacheRepositoryProxyFactoryBean");
+                    BeanDefinitionBuilder builder =
+                            BeanDefinitionBuilder.genericBeanDefinition(CacheRepositoryFactoryBean.class);
                     builder.addConstructorArgValue(repoClass);
                     builder.addConstructorArgValue(valueType);
 
